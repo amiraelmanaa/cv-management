@@ -49,4 +49,12 @@ export class UserService {
     const user = await this.findOne(id);
     return this.userRepository.remove(user);
   }
+
+
+  //ne lance pas erreur
+  async findByEmail(email: string) {
+  return this.userRepository.findOne({
+    where: { email },
+  });
+}
 }
