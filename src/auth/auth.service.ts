@@ -30,18 +30,22 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('Cet email est déjà utilisé');
     }
-
+ 
+    /*
     // 3 Hacher le mot de passe
     const hashedPassword = await bcrypt.hash(
       signupDto.password,
       10,
     );
+    */
+   
+
 
     // 4 Créer le new user
     const user = await this.userService.create({
       username: signupDto.username,
       email: signupDto.email,
-      password: hashedPassword,
+      password: signupDto.password,
     });
 
     // 5 Ne pas retourner le mot de passe
