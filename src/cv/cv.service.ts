@@ -50,17 +50,27 @@ export class CvService {
   }
   */
 
-  findAll(userId: number) {
+ findAll(userId: number, role: string) {
+  // Un admin peut consulter tous les CV
+  if (role === 'admin') {
     return this.cvRepository.find({
-      where: {
-        user: { id: userId },
-      },
       relations: {
         user: true,
         skills: true,
       },
     });
   }
+ // Un user ne consulte que ses propres CV
+  return this.cvRepository.find({
+    where: {
+      user: { id: userId },
+    },
+    relations: {
+      user: true,
+      skills: true,
+    },
+  });
+}
 
   // ==========================================
   // 3. FIND ONE
@@ -86,24 +96,27 @@ export class CvService {
   }
   */
 
-  async findOne(id: number, userId: number) {
-    const cv = await this.cvRepository.findOne({
-      where: {
-        id,
-        user: { id: userId },
-      },
-      relations: {
-        user: true,
-        skills: true,
-      },
-    });
+  async findOne(id: number, userId: number, role: string) {
+  // Un admin peut consulter n'importe quel CV
+  const whereCondition =
+    role === 'admin'
+      ? { id }
+      : { id, user: { id: userId } };
 
-    if (!cv) {
-      throw new NotFoundException(`CV ${id} not found`);
-    }
+  const cv = await this.cvRepository.findOne({
+    where: whereCondition,
+    relations: {
+      user: true,
+      skills: true,
+    },
+  });
 
-    return cv;
+  if (!cv) {
+    throw new NotFoundException(`CV ${id} not found`);
   }
+
+  return cv;
+}
 
   // ==========================================
   // 4. UPDATE
@@ -123,8 +136,9 @@ export class CvService {
     id: number,
     data: DeepPartial<Cv>,
     userId: number,
+    role: string,
   ) {
-    const cv = await this.findOne(id, userId);
+    const cv = await this.findOne(id, userId, role);
 
     const safeData = { ...data };
 
@@ -150,9 +164,32 @@ export class CvService {
   }
   */
 
-  async remove(id: number, userId: number) {
-    const cv = await this.findOne(id, userId);
+  async remove(id: number, userId: number, role: string) {
+    const cv = await this.findOne(id, userId, role);
 
     return this.cvRepository.remove(cv);
+ 
   }
+
+
+//une méthode privée qui vérifie toujours le propriétaire
+private async findOneOwned(id: number, userId: number) {
+  const cv = await this.cvRepository.findOne({
+    where: {
+      id,
+      user: { id: userId },
+    },
+    relations: {
+      user: true,
+      skills: true,
+    },
+  });
+
+  if (!cv) {
+    throw new NotFoundException(`CV ${id} not found`);
+  }
+
+  return cv;
+}
+
 }

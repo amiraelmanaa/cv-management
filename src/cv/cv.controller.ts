@@ -70,11 +70,14 @@ adminTest() {
   }
   */
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  findAll(@Req() request: any) {
-    return this.cvService.findAll(request.user.id);
-  }
+ @Get()
+@UseGuards(JwtAuthGuard)
+findAll(@Req() request: any) {
+  return this.cvService.findAll(
+    request.user.id,
+    request.user.role,
+  );
+}
 
   // ==========================================
   // 3. FIND ONE
@@ -90,16 +93,17 @@ adminTest() {
   */
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  findOne(
-    @Param('id') id: string,
-    @Req() request: any,
-  ) {
-    return this.cvService.findOne(
-      +id,
-      request.user.id,
-    );
-  }
+@UseGuards(JwtAuthGuard)
+findOne(
+  @Param('id') id: string,
+  @Req() request: any,
+) {
+  return this.cvService.findOne(
+    +id,
+    request.user.id,
+    request.user.role,
+  );
+}
 
   // ==========================================
   // 4. UPDATE
@@ -128,6 +132,7 @@ adminTest() {
       +id,
       updateCvDto,
       request.user.id,
+      request.user.role,
     );
   }
 
@@ -153,6 +158,7 @@ adminTest() {
     return this.cvService.remove(
       +id,
       request.user.id,
+      request.user.role,
     );
   }
 

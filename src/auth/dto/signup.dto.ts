@@ -1,6 +1,21 @@
+
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from 'class-validator';
+
 export class SignupDto {
+  @IsString()
+  @IsNotEmpty()
   username: string;
+
+  @IsEmail()
   email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
   password: string;
 }
-//le client ne doit pas pouvoir s'inscrire directement comme admin
