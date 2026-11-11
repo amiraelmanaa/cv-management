@@ -1,14 +1,14 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   signup(@Body() signupDto: SignupDto) {
@@ -16,7 +16,18 @@ export class AuthController {
   }
 
   @Post('login')
- login(@Body() loginDto: LoginDto) {
-  return this.authService.login(loginDto);
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+
+
+@Get('profile')
+@UseGuards(JwtAuthGuard)
+getProfile(@Req() request: Request) {
+  return {
+    message: 'Vous êtes authentifié !',
+    user: request.user,
+  };
 }
+
 }

@@ -10,10 +10,13 @@ import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 
+import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signup(signupDto: SignupDto) {
@@ -53,7 +56,7 @@ export class AuthService {
   }
 
 
-
+/* ... 
   //Login
 async login(loginDto: LoginDto) {
 
@@ -86,5 +89,44 @@ async login(loginDto: LoginDto) {
     email: user.email,
     role: user.role,
   };
+
 }
+  */
+
+async login(loginDto: LoginDto) {
+  const user = await this.userService.findByEmail(loginDto.email);
+
+  if (!user) {
+    throw new UnauthorizedException('Email ou mot de passe incorrect');
+  }
+
+  const isPasswordValid = await bcrypt.compare(
+    loginDto.password,
+    user.password,
+  );
+
+  if (!isPasswordValid) {
+    throw new UnauthorizedException('Email ou mot de passe incorrect');
+  }
+
+  // Générer le JWT
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  };
+
+  const access_token = await this.jwtService.signAsync(payload);
+
+  return {
+    access_token,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    },
+  };
+}
+
 }
