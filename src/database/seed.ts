@@ -66,7 +66,7 @@ async function seed() {
       path: `uploads/cv-${i}-${j}.pdf`,
       user: user,
       skills: selectedSkills,
-    });
+    },1); // parametre 1 just zedtou bch tetna7a erreur baad ma badlt el create w walet tekho user.id 
   }
 }
 
